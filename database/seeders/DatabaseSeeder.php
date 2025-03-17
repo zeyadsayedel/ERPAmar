@@ -13,19 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed roles and permissions first
-        $this->call(RoleAndPermissionSeeder::class);
-        
-        // Create test user
+        // User::factory(10)->create();
+
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-        
-        // Assign admin role to test user
-        $user = User::where('email', 'test@example.com')->first();
-        if ($user) {
-            $user->assignWordPressRole('administrator');
-        }
     }
 }
