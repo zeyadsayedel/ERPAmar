@@ -1,11 +1,102 @@
 ## [Unreleased]
 
-## [2024-03-19]
+## [2025-03-17]
 
-🚀 Added
+### 🚀 Added
 - Created Car API module (CarController, CarResource, StoreCarRequest, UpdateCarRequest)
 - Created Quarry API module (QuarryController, QuarryResource, StoreQuarryRequest, UpdateQuarryRequest)
 - Registered cars and quarries apiResource routes
 - Validation + formatting as per schema
+- Full React + Inertia CRUD UI for Car and Quarry modules
+  - Index pages with paginated data tables
+  - Create/Edit pages with reusable form components
+  - Table actions for edit/delete operations
+  - Import/Export functionality with CSV/Excel support
+  - Used shadcn/ui components throughout
+  - Added form validation and error handling
+  - Created shared components for modals and imports
+  - Implemented tabbed interface for complex Quarry form
+  - Added status indicators in table views
 
-// ...existing changelog content...
+### 💅 Enhancements
+- Shared components between modules:
+  - ConfirmDeleteModal using AlertDialog
+  - ImportExportBar with Dropzone
+  - Reusable form field wrappers
+- Improved UX with:
+  - Validation error handling
+  - Loading states
+  - Responsive layouts
+  - Status indicators
+  - Type conversion for numeric fields
+
+### 🔧 Technical Details
+- Proper type handling for numeric and boolean fields
+- Organized complex forms with tabs
+- Reusable table action components
+- Consistent layout and styling
+- Backend-compatible data formatting
+
+### 📝 Notes
+- Consider adding:
+  - Inline filtering
+  - Batch operations
+  - Advanced search
+  - Export customization
+  - Progress tracking for imports
+
+## [2024-03-19]
+
+### 🚀 Added
+- Full CRUD pages and logic for Car and Quarry modules
+  - Create/Edit/Index pages with dynamic routing
+  - Form validation and error handling
+  - Proper type casting for numeric/boolean fields
+  - File import/export capabilities
+- Components:
+  - CarForm with simple field layout
+  - QuarryForm with tabbed interface for better organization
+  - TableActions with edit/delete functionality
+  - ImportExportBar with Dropzone support
+  - ConfirmDeleteModal using shadcn/ui AlertDialog
+- Integrated with Backend:
+  - Connected to Laravel FormRequests
+  - Proper data type handling
+  - Reusable components between modules
+  - Error handling from backend validation
+
+### 💅 Enhancements
+- UI/UX Improvements:
+  - Tabbed interface for complex forms
+  - Status indicators in tables
+  - Consistent layout and styling
+  - Proper numeric formatting
+  - Loading states and feedback
+- Code Quality:
+  - DRY components and layouts
+  - Type-safe form handling
+  - Modular component structure
+  - Shared utilities and styles
+
+### 🔧 Technical Implementation
+- Used shadcn/ui components throughout
+- Implemented Inertia.js form handling
+- Connected to Laravel backend routes
+- Proper error propagation
+
+### 💭 Next Steps
+Consider adding:
+- Inline table filtering
+- Batch operations
+- Advanced search capabilities
+- Export customization
+- Import progress tracking
+- Role-based component rendering
+
+### 🏗 Architecture Notes
+- Forms use controlled inputs with proper validation
+- Tables support pagination and sorting
+- Modals handle confirmation flows
+- Import/Export uses proper file handling
+- Components follow single responsibility principle
+
