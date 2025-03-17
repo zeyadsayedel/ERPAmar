@@ -113,4 +113,16 @@ class User extends Authenticatable
     {
         return $this->hasRole($role);
     }
+
+    // 🚘 cars the user has access to
+    public function cars()
+    {
+        return $this->belongsToMany(Car::class)->withTimestamps();
+    }
+
+    // ⛏️ quarries the user manages
+    public function quarries()
+    {
+        return $this->belongsToMany(Quarry::class)->withTimestamps();
+    }
 }

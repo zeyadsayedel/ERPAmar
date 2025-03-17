@@ -25,7 +25,7 @@ Route::prefix('auth')->group(function () {
 });
 
 
-Route::middleware('auth:sunctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cars', CarController::class);
     Route::apiResource('quarries', QuarryController::class);
 });

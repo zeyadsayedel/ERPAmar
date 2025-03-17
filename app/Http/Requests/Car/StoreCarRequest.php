@@ -11,7 +11,7 @@ class StoreCarRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreCarRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'nullable|string|max:255',
+            'car_load' => 'nullable|numeric',
+            'type_of_car' => 'nullable|string',
+            'car_load_supply' => 'nullable|numeric',
         ];
     }
 }
