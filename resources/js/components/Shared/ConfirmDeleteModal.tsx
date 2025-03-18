@@ -8,14 +8,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/Components/ui/alert-dialog";
+import { FC } from "react";
 
-export default function ConfirmDeleteModal({
+interface ConfirmDeleteModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title?: string;
+  description?: string;
+}
+
+const ConfirmDeleteModal: FC<ConfirmDeleteModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title = "Are you sure?",
   description = "This action cannot be undone.",
-}) {
+}) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
@@ -35,4 +44,6 @@ export default function ConfirmDeleteModal({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};
+
+export default ConfirmDeleteModal;

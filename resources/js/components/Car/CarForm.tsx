@@ -1,43 +1,36 @@
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { LoaderCircle } from 'lucide-react';
-
-interface CarFormData {
-  name: string;
-  car_load: string;
-  type_of_car: string;
-  car_load_supply: string;
-}
+import InputError from '@/components/input-error';
+import { type Car, type CarFormData } from '@/types/car';
 
 interface CarFormProps {
-  initialValues?: CarFormData;
+  initialValues?: Car;
   onSubmit: (data: CarFormData) => void;
+  isSubmitting?: boolean;
 }
 
-export default function CarForm({ initialValues, onSubmit }: CarFormProps) {
-  const { data, setData, errors, processing, reset } = useForm<CarFormData>({
-    name: initialValues?.name || '',
-    car_load: initialValues?.car_load?.toString() || '',
-    type_of_car: initialValues?.type_of_car || '',
-    car_load_supply: initialValues?.car_load_supply?.toString() || '',
+export default function CarForm({ initialValues, onSubmit, isSubmitting = false }: CarFormProps) {
+  const { data, setData, errors, processing } = useForm<CarFormData>({
+    name: initialValues?.name ?? '',
+    car_load: initialValues?.car_load?.toString() ?? '',
+    type_of_car: initialValues?.type_of_car ?? '',
+    car_load_supply: initialValues?.car_load_supply?.toString() ?? '',
   });
 
-  const handleSubmit: FormEventHandler = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(data);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">Car Name</Label>
         <Input
           id="name"
-          type="text"
           value={data.name}
           onChange={e => setData('name', e.target.value)}
           placeholder="Enter car name"
@@ -62,7 +55,6 @@ export default function CarForm({ initialValues, onSubmit }: CarFormProps) {
         <Label htmlFor="type_of_car">Type of Car</Label>
         <Input
           id="type_of_car"
-          type="text"
           value={data.type_of_car}
           onChange={e => setData('type_of_car', e.target.value)}
           placeholder="Enter car type"
@@ -84,8 +76,8 @@ export default function CarForm({ initialValues, onSubmit }: CarFormProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button type="submit" disabled={processing}>
-          {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+        <Button type="submit" disabled={processing || isSubmitting}>
+          {(processing || isSubmitting) && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
           {initialValues ? 'Update Car' : 'Create Car'}
         </Button>
       </div>

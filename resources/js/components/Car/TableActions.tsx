@@ -1,9 +1,14 @@
-import { Button } from "@/Components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
-import ConfirmDeleteModal from "@/Components/Shared/ConfirmDeleteModal";
+import { Button } from '@/components/ui/button';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import ConfirmDeleteModal from '@/components/Shared/ConfirmDeleteModal';
 
-export default function TableActions({ onEdit, onDelete }) {
+interface TableActionsProps {
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+export default function TableActions({ onEdit, onDelete }: TableActionsProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleDelete = () => {

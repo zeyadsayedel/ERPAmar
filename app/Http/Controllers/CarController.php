@@ -39,6 +39,14 @@ class CarController extends Controller
             ->with('message', 'Car created successfully.');
     }
 
+    // show method is missing
+    public function show(Car $car): Response
+    {
+        return Inertia::render('Car/Show', [
+            'car' => $car
+        ]);
+    }
+
     public function edit(Car $car): Response
     {
         return Inertia::render('Car/Edit', [

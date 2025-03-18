@@ -39,6 +39,15 @@ class QuarryController extends Controller
             ->with('message', 'Quarry created successfully.');
     }
 
+
+    // show method is missing
+    public function show(Quarry $quarry): Response
+    {
+        return Inertia::render('Quarry/Show', [
+            'quarry' => $quarry
+        ]);
+    }
+
     public function edit(Quarry $quarry): Response
     {
         return Inertia::render('Quarry/Edit', [

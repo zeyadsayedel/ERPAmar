@@ -22,8 +22,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Link } from "@inertiajs/react"
-import { LucideIcon } from "lucide-react"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -152,91 +150,101 @@ function SidebarProvider({
 }
 
 function Sidebar({
-  children
-}: { children: React.ReactNode }) {
-  return (
-    <div className="flex h-screen">
-      <div className="flex flex-col w-64 border-r bg-white">
+  side = "left",
+  variant = "sidebar",
+  collapsible = "offcanvas",
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  side?: "left" | "right"
+  variant?: "sidebar" | "floating" | "inset"
+  collapsible?: "offcanvas" | "icon" | "none"
+}) {
+  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+
+  if (collapsible === "none") {
+    return (
+      <div
+        data-slot="sidebar"
+        className={cn(
+          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+          className
+        )}
+        {...props}
+      >
         {children}
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-function SidebarHeader({
-  children
-}: { children: React.ReactNode }) {
+  if (isMobile) {
+    return (
+      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <SheetHeader className="sr-only">
+          <SheetTitle>Sidebar</SheetTitle>
+          <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+        </SheetHeader>
+        <SheetContent
+          data-sidebar="sidebar"
+          data-slot="sidebar"
+          data-mobile="true"
+          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          style={
+            {
+              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+            } as React.CSSProperties
+          }
+          side={side}
+        >
+          <div className="flex h-full w-full flex-col">{children}</div>
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
   return (
-    <div className="h-16 flex-shrink-0">
-      {children}
-    </div>
-  )
-}
-
-function SidebarContent({
-  children
-}: { children: React.ReactNode }) {
-  return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-      {children}
-    </div>
-  )
-}
-
-function SidebarMenu({
-  children
-}: { children: React.ReactNode }) {
-  return (
-    <nav className="flex-1 px-2 py-4 space-y-1">
-      {children}
-    </nav>
-  )
-}
-
-function SidebarMenuItem({
-  children
-}: { children: React.ReactNode }) {
-  return (
-    <div>
-      {children}
-    </div>
-  )
-}
-
-interface SidebarMenuButtonProps {
-  href: string;
-  icon: LucideIcon;
-  children: React.ReactNode;
-  "data-active"?: boolean;
-}
-
-function SidebarMenuButton({
-  href,
-  icon: Icon,
-  children,
-  "data-active": active,
-}: SidebarMenuButtonProps) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "group flex items-center px-3 py-2 text-sm font-medium rounded-md",
-        active
-          ? "bg-gray-100 text-gray-900"
-          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-      )}
+    <div
+      className="group peer text-sidebar-foreground hidden md:block"
+      data-state={state}
+      data-collapsible={state === "collapsed" ? collapsible : ""}
+      data-variant={variant}
+      data-side={side}
+      data-slot="sidebar"
     >
-      <Icon
+      {/* This is what handles the sidebar gap on desktop */}
+      <div
         className={cn(
-          "mr-3 h-5 w-5 flex-shrink-0",
-          active
-            ? "text-gray-500"
-            : "text-gray-400 group-hover:text-gray-500"
+          "relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+          "group-data-[collapsible=offcanvas]:w-0",
+          "group-data-[side=right]:rotate-180",
+          variant === "floating" || variant === "inset"
+            ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
+            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
-        aria-hidden="true"
       />
-      {children}
-    </Link>
+      <div
+        className={cn(
+          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          side === "left"
+            ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
+            : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+          // Adjust the padding for floating and inset variants.
+          variant === "floating" || variant === "inset"
+            ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
+            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
+          className
+        )}
+        {...props}
+      >
+        <div
+          data-sidebar="sidebar"
+          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+        >
+          {children}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -319,6 +327,17 @@ function SidebarInput({
   )
 }
 
+function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sidebar-header"
+      data-sidebar="header"
+      className={cn("flex flex-col gap-2 p-2", className)}
+      {...props}
+    />
+  )
+}
+
 function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -339,6 +358,20 @@ function SidebarSeparator({
       data-slot="sidebar-separator"
       data-sidebar="separator"
       className={cn("bg-sidebar-border mx-2 w-auto", className)}
+      {...props}
+    />
+  )
+}
+
+function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sidebar-content"
+      data-sidebar="content"
+      className={cn(
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        className
+      )}
       {...props}
     />
   )

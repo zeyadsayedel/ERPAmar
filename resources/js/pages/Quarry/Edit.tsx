@@ -60,7 +60,7 @@ export default function Edit({ quarry }: Props) {
 
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+          <div className="bg-background overflow-hidden shadow-sm sm:rounded-lg">
             <div className="p-6">
               <h2 className="text-2xl font-semibold mb-6">Edit Quarry - {quarry.name}</h2>
               <QuarryForm

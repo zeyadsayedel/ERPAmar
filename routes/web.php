@@ -15,15 +15,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Cars
-    Route::resource('cars', CarController::class);
-    Route::post('cars/import', [CarController::class, 'import'])->name('cars.import');
-    Route::get('cars/export', [CarController::class, 'export'])->name('cars.export');
+    Route::prefix('cars')->group(function () {
+        Route::post('/import', [CarController::class, 'import'])->name('cars.import');
+        Route::get('/export', [CarController::class, 'export'])->name('cars.export');
+        Route::resource('/', CarController::class);
+    });
 
     // Quarries
-    Route::resource('quarries', QuarryController::class);
-    Route::post('quarries/import', [QuarryController::class, 'import'])->name('quarries.import');
-    Route::get('quarries/export', [QuarryController::class, 'export'])->name('quarries.export');
+    Route::prefix('quarries')->group(function () {
+        Route::post('/import', [QuarryController::class, 'import'])->name('quarries.import');
+        Route::get('/export', [QuarryController::class, 'export'])->name('quarries.export');
+        Route::resource('/', QuarryController::class);
+    });
+
+
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
