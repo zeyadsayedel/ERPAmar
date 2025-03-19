@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Traits;
+
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Auth;
+
+trait AuthorizesModuleActions
+{
+    /**
+     * The module name (e.g., 'user', 'role', 'car', 'quarry')
+     * Should be overridden in the controller
+     */
+    protected string $module = '';
+    
+    /**
+     * Construct a permission string in the format 'module:action'
+     */
+    protected function permission(string $action): string
+    {
+        return $this->module . ':' . $action;
+    }
+    
+    /**
+     * Authorize a module action (or throw an exception)
+     * 
+     * @param string $action The action name (e.g., 'view', 'create', 'update', 'delete')
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    protected function authorizeModule(string $action): void
+    {
+        $permission = $this->permission($action);
+        
+        if (!Auth::user()->hasPermissionTo($permission)) {
+            throw new AuthorizationException("You do not have permission to {$action} this {$this->module}.");
+        }
+    }
+    
+    /**
+     * Check if the user can perform a module action
+     * 
+     * @param string $action The action name
+     * @return bool
+     */
+    protected function canPerformAction(string $action): bool
+    {
+        return Auth::user()->hasPermissionTo($this->permission($action));
+    }
+    
+    /**
+     * Get an array of permissions the user has for this module
+     * 
+     * @return array
+     */
+    protected function getUserModulePermissions(): array
+    {
+        $user = Auth::user();
+        $permissions = [];
+        
+        $standardActions = ['view', 'list', 'create', 'update', 'delete'];
+        
+        foreach ($standardActions as $action) {
+            $permissions[$action] = $user->hasPermissionTo($this->permission($action));
+        }
+        
+        return $permissions;
+    }
+    
+    /**
+     * Set up middleware for standard controller actions based on permissions
+     * This should be called in the controller constructor
+     */
+    protected function setupPermissionMiddleware(): void
+    {
+        $this->middleware('permission:' . $this->permission('list'))->only(['index']);
+        $this->middleware('permission:' . $this->permission('view'))->only(['show']);
+        $this->middleware('permission:' . $this->permission('create'))->only(['create', 'store']);
+        $this->middleware('permission:' . $this->permission('update'))->only(['edit', 'update']);
+        $this->middleware('permission:' . $this->permission('delete'))->only(['destroy']);
+    }
+    
+    /**
+     * Share module permissions with the Inertia view
+     * 
+     * @return array
+     */
+    protected function shareModulePermissions(): array
+    {
+        return [
+            'permissions' => $this->getUserModulePermissions(),
+            'module' => $this->module,
+        ];
+    }
+}

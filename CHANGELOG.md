@@ -1,5 +1,38 @@
 ## [Unreleased]
 
+### Added
+- Integrated Role & Permission Management System
+  - Core Services:
+    - RolePermissionService for centralized role/permission management
+    - UserRoleService for user-role assignments
+    - LegacyRoleAdapter for migration support
+  - Middleware & Traits:
+    - CheckPermission middleware in bootstrap/app.php
+    - AuthorizesModuleActions trait for controllers
+    - InertiaPermissions trait for frontend data sharing
+  - Frontend Components:
+    - Role management pages (Index, Create, Edit, Show)
+    - Permission management pages (Index, Create, Edit)
+    - PermissionChecker component
+    - Permission-aware DataTable
+    - Dynamic SidebarMenu
+  - Backend Implementation:
+    - API and Admin controllers for roles and permissions
+    - Form requests with validation
+    - API resources for consistent responses
+    - Service providers registered in bootstrap/providers.php
+
+### Changed
+- Updated HandleInertiaRequests to share permission data
+- Integrated spatie/laravel-permission with module-based structure
+- Added role and permission routes to web.php and api.php
+
+### Next Steps
+1. Write tests for role and permission functionality
+2. Add documentation for module permission registration
+3. Create examples for common permission checks
+4. Implement role-based access control (RBAC) audit logging
+
 ## [2025-03-17]
 
 ### 🚀 Added
