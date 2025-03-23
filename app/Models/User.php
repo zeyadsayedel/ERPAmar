@@ -15,7 +15,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, HasApiTokens, HasPermissions;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasPermissions, Authorizable;
 
     /**
      * The attributes that are mass assignable.

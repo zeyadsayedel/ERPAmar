@@ -31,6 +31,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Get the current module from route if available
+        $routeName = $request->route() ? $request->route()->getName() : null;
+        $module = null;
+        
+        // Extract module from route name (e.g., admin.users.edit → user)
+        if ($routeName && preg_match('/^(admin|settings)\.([a-z]+)\./', $routeName, $matches)) {
+            $module = rtrim($matches[2], 's'); // Remove trailing 's' for plurals
+        }
+        
+        // Add debug info
+        \Log::info('Current route and module', [
+            'route' => $routeName,
+            'module' => $module,
+        ]);
+        
         return [
             ...parent::share($request),
             'auth' => [
@@ -39,6 +54,7 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'roles' => $request->user()->roles->pluck('name'),
+                    'permissions' => $request->user()->getAllPermissions()->pluck('name')->toArray(),
                     'module_access' => $this->getUserModuleAccess($request),
                 ] : null,
             ],
@@ -50,6 +66,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'currentModule' => $module,
         ];
     }
     

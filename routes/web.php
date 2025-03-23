@@ -2,8 +2,7 @@
 
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\QuarryController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -30,15 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('/', QuarryController::class);
     });
 
-    // Admin
-   /*  Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('roles', RoleController::class);
-        Route::resource('permissions', PermissionController::class);
-        Route::get('permissions/module/{module}', [PermissionController::class, 'modulePermissions'])
-            ->name('permissions.module');
-        Route::post('permissions/register-module', [PermissionController::class, 'registerModule'])
-            ->name('permissions.register-module');
-    }); */
+
+    
 });
 
 // In a routes file

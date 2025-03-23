@@ -12,6 +12,7 @@ interface CustomPageProps extends PageProps {
   auth?: {
     user?: User;
   };
+  userPermissions?: Record<string, boolean>;
 }
 
 interface PermissionsContextType {
@@ -26,40 +27,93 @@ const PermissionsContext = createContext<PermissionsContextType>({
   hasModuleAccess: () => false,
 });
 
+// This creates a context that will be consumed by child components
 export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // We don't call usePage() here - instead we'll use a consumer component
   const [userData, setUserData] = useState<User | null>(null);
-  
-  // Try to access Inertia page data, but wrap in try/catch to handle non-Inertia contexts
-  useEffect(() => {
-    try {
-      const { auth } = usePage<CustomPageProps>().props;
-      setUserData(auth?.user ?? null);
-    } catch (error) {
-      // Running outside of Inertia context
-      console.warn('PermissionsProvider: Not running in Inertia context');
+  const [pagePermissions, setPagePermissions] = useState<Record<string, boolean>>({});
+
+  const can = useCallback((permission: string): boolean => {
+    console.log('Checking permission:', permission);
+    console.log('User data:', userData);
+    console.log('Page permissions:', pagePermissions);
+    
+    // First check format "module:action"
+    if (permission.includes(':')) {
+      const [module, action] = permission.split(':');
+      
+      // Check in page permissions first (from controller)
+      if (pagePermissions && pagePermissions[action] === true) {
+        return true;
+      }
+      
+      // Then check in user permissions array (from auth)
+      if (userData?.permissions?.includes(permission)) {
+        return true;
+      }
+    } 
+    // If just checking for a simple permission key
+    else if (pagePermissions && pagePermissions[permission] === true) {
+      return true;
     }
-  }, []);
+    
+    return false;
+  }, [userData, pagePermissions]);
 
-  const can = useCallback((permission: string) => {
-    if (!userData) return false;
-    return userData.permissions?.includes(permission) ?? false;
-  }, [userData]);
-
-  const hasRole = useCallback((role: string) => {
+  const hasRole = useCallback((role: string): boolean => {
     if (!userData) return false;
     return userData.roles?.includes(role) ?? false;
   }, [userData]);
 
-  const hasModuleAccess = useCallback((module: string) => {
+  const hasModuleAccess = useCallback((module: string): boolean => {
     if (!userData) return false;
     return userData.module_access?.[module] ?? false;
   }, [userData]);
 
   return (
-    <PermissionsContext.Provider value={{ can, hasRole, hasModuleAccess }}>
-      {children}
+    <PermissionsContext.Provider 
+      value={{ 
+        can, 
+        hasRole, 
+        hasModuleAccess 
+      }}
+    >
+      <PermissionsDataLoader 
+        setUserData={setUserData}
+        setPagePermissions={setPagePermissions}
+      >
+        {children}
+      </PermissionsDataLoader>
     </PermissionsContext.Provider>
   );
+};
+
+// This component will safely use the usePage() hook within an Inertia component context
+const PermissionsDataLoader: React.FC<{ 
+  children: React.ReactNode;
+  setUserData: React.Dispatch<React.SetStateAction<User | null>>;
+  setPagePermissions: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+}> = ({ children, setUserData, setPagePermissions }) => {
+  try {
+    // usePage is only called inside an Inertia component where it's safe
+    const { auth, userPermissions } = usePage<CustomPageProps>().props;
+    
+    // Update state when props change
+    useEffect(() => {
+      console.log('Auth data loaded:', auth?.user);
+      console.log('Page permissions loaded:', userPermissions);
+      
+      setUserData(auth?.user || null);
+      setPagePermissions(userPermissions || {});
+    }, [auth, userPermissions]);
+    
+    // Just render children - data loading is handled in the effect
+    return <>{children}</>;
+  } catch (error) {
+    // If we're not in an Inertia context, just render children
+    console.warn('PermissionsDataLoader: Not running in Inertia context', error);
+    return <>{children}</>;
+  }
 };
 
 export const usePermissions = () => {
