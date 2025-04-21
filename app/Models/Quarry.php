@@ -2,10 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Quarry extends Model
 {
+    use HasFactory;
+    
     protected $table = 'quarry';
 
     protected $fillable = [
@@ -74,5 +80,20 @@ class Quarry extends Model
     public function users()
     {
         return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function customers(): BelongsToMany
+    {
+        return $this->belongsToMany(CustomerAccount::class, 'customer_quarry');
+    }
+
+    public function contractors(): BelongsToMany
+    {
+        return $this->belongsToMany(CarContractor::class, 'car_contractor_quarry');
     }
 }

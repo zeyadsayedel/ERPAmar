@@ -1,0 +1,303 @@
+1. Invoice Pod
+
+Pod Name: invoice
+Pod Type: post_type
+
+Fields in "details" group:
+
+cashier: type=pick, required=0, pick_format_type=single
+quarry: type=pick, required=1, pick_format_type=single
+invoice_type: type=pick, required=1, pick_format_type=single
+customer: type=pick, required=1, pick_format_type=single
+customer_car: type=pick, required=1, pick_format_type=single
+unit: type=pick, required=0, hidden=1, pick_format_type=single
+contractor: type=pick, required=0, pick_format_type=single
+custody: type=number, required=0
+the_items: type=pick, required=1, pick_format_type=single
+item_price: type=number, required=0, hidden=1
+total: type=number, required=0, hidden=1
+quantity: type=number, required=0, hidden=1
+flag: type=number, required=0, hidden=1
+supply: type=boolean, required=0, hidden=1, boolean_format_type=radio
+start_day: type=boolean, required=0, hidden=1, boolean_format_type=checkbox
+
+2. Customer Account Pod
+
+Pod Name: customer_account
+Pod Type: post_type
+
+Fields in "details" group:
+
+client_type: type=pick, required=1, pick_format_type=single
+quarry_client: type=pick, required=0, pick_format_type=multi
+walk_in_customer: type=boolean, required=0, boolean_format_type=checkbox
+sand_price: type=number, required=0
+soil_price: type=number, required=0
+zalat_price: type=number, required=0
+rubble_price: type=number, required=0
+
+Fields in "sand_calculation_for_each_car_type" group:
+
+tractor_sand_price: type=number, required=0
+trilla_sand_price: type=number, required=0
+faradani_sand_price: type=number, required=0
+faradani_double_sand_price: type=number, required=0
+farm_tractor_sand_price: type=number, required=0
+
+Fields in "soil_calculation_for_each_car_type" group:
+
+tractor_soil_price: type=number, required=0
+trilla_soil_price: type=number, required=0
+faradani_soil_price: type=number, required=0
+faradani_double_soil_price: type=number, required=0
+farm_tractor_soil_price: type=number, required=0
+
+Fields in "calculation_of_slippage_for_each_type_of_car" group:
+
+tractor_zalat_price: type=number, required=0
+trilla_zalat_price: type=number, required=0
+faradani_zalat_price: type=number, required=0
+faradani_double_zalat_price: type=number, required=0
+farm_tractor_zalat_price: type=number, required=0
+
+Fields in "rubble_account_for_each_type_of_car" group:
+
+tractor_rubble_price: type=number, required=0
+trilla_rubble_price: type=number, required=0
+faradani_rubble_price: type=number, required=0
+faradani_double_rubble_price: type=number, required=0
+farm_tractor_rubble_price: type=number, required=0
+
+3. Supply Client Pod
+
+Pod Name: supply_client
+Pod Type: pod
+
+Fields in "details" group:
+
+name: type=text, required=1
+created: type=datetime
+modified: type=datetime
+company_name: type=text, required=0
+address: type=text, required=0
+
+Fields in "socials" group:
+
+email: type=email, required=0
+phone_number: type=phone, required=0
+
+4. Car Contractor Pod
+
+Pod Name: car_contractor
+Pod Type: post_type
+
+Fields in "more_fields" group:
+
+cars: type=pick, required=0, pick_format_type=multi
+quarries: type=pick, required=0, pick_format_type=multi
+customers: type=pick, required=0, pick_format_type=multi
+supply_clients: type=pick, required=0, pick_format_type=multi
+
+
+# Laravel Project Review
+
+Based on the pods schema from your JSON file, I'll analyze what should be properly implemented for each model according to Laravel 12 and Inertia.js best practices.
+
+## Model Analysis
+
+### 1. Invoice Model
+- **Fields**: cashier (user), quarry, invoice_type, customer, customer_car, unit, contractor, custody, the_items, item_price, total, quantity, flag, supply, start_day
+- **Relationships**:
+  - BelongsTo User (cashier)
+  - BelongsTo Quarry
+  - BelongsTo CustomerAccount
+  - BelongsTo Car (customer_car)
+  - BelongsTo CarContractor
+
+### 2. CustomerAccount Model
+- **Fields**: client_type, quarry_client, walk_in_customer, sand_price, soil_price, zalat_price, rubble_price, plus various car-specific pricing fields
+- **Relationships**:
+  - BelongsToMany Quarry
+  - HasMany Invoice
+
+### 3. SupplyClient Model
+- **Fields**: name, created, modified, company_name, address, email, phone_number
+- **Relationships**:
+  - BelongsToMany CarContractor
+
+### 4. CarContractor Model
+- **Fields**: cars, quarries, customers, supply_clients
+- **Relationships**:
+  - BelongsToMany Car
+  - BelongsToMany Quarry
+  - BelongsToMany CustomerAccount
+  - BelongsToMany SupplyClient
+  - HasMany Invoice
+
+## Implementation Checklist
+
+For each model, ensure the following are properly scaffolded:
+
+### Invoice
+- [ ] Model with proper relationships and fillable fields
+- [ ] Migration with appropriate field types and foreign keys
+- [ ] Admin Controller returning Inertia responses
+- [ ] API Controller returning JSON responses
+- [ ] Store/Update Requests with validation from schema rules
+- [ ] Resource that returns related models (not just IDs)
+
+### CustomerAccount
+- [ ] Model with proper relationships (including many-to-many)
+- [ ] Migration with price fields and related tables
+- [ ] Controllers for both admin and API
+- [ ] Request validation for all fields, especially pricing
+- [ ] Resource that handles the complex pricing structure
+
+### SupplyClient
+- [ ] Model with correct datetime handling for created/modified
+- [ ] Migration with text, email, and phone fields
+- [ ] Controllers with proper format responses
+- [ ] Validation for email and phone number
+- [ ] Resource that formats dates properly
+
+### CarContractor
+- [ ] Model with multiple many-to-many relationships
+- [ ] Migration with necessary pivot tables
+- [ ] Controllers that handle complex relationship queries
+- [ ] Request validation for relationship arrays
+- [ ] Resource that includes nested related resources
+
+## Key Implementation Points
+
+### Models
+```php
+// Example for Invoice.php
+class Invoice extends Model
+{
+    protected $fillable = [
+        'cashier_id',
+        'quarry_id',
+        'invoice_type',
+        'customer_id',
+        'customer_car_id',
+        'unit',
+        'contractor_id',
+        'custody',
+        'the_items',
+        'item_price',
+        'total',
+        'quantity',
+        'flag',
+        'supply',
+        'start_day',
+    ];
+    
+    public function cashier()
+    {
+        return $this->belongsTo(User::class, 'cashier_id');
+    }
+    
+    public function quarry()
+    {
+        return $this->belongsTo(Quarry::class);
+    }
+    
+    // More relationships...
+}
+```
+
+### Migrations
+```php
+// Example for create_invoices_table.php
+Schema::create('invoices', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('cashier_id')->nullable()->constrained('users');
+    $table->foreignId('quarry_id')->constrained();
+    $table->string('invoice_type');
+    $table->foreignId('customer_id')->constrained('customer_accounts');
+    $table->foreignId('customer_car_id')->constrained('cars');
+    $table->string('unit')->default('car')->nullable();
+    $table->foreignId('contractor_id')->nullable()->constrained('car_contractors');
+    $table->decimal('custody', 12, 2)->nullable();
+    $table->string('the_items');
+    $table->decimal('item_price', 12, 2)->nullable();
+    $table->decimal('total', 12, 2)->nullable();
+    $table->decimal('quantity', 12, 2)->nullable();
+    $table->integer('flag')->default(1)->nullable();
+    $table->boolean('supply')->default(false);
+    $table->boolean('start_day')->default(false);
+    $table->timestamps();
+});
+```
+
+### Controllers
+```php
+// Example for Admin/InvoiceController.php
+public function index()
+{
+    $this->authorize('viewAny', Invoice::class);
+    
+    $invoices = Invoice::with([
+        'cashier', 'quarry', 'customer', 'customerCar', 'contractor'
+    ])->paginate();
+    
+    return Inertia::render('Invoices/Index', [
+        'invoices' => InvoiceResource::collection($invoices)
+    ]);
+}
+
+// Example for Api/InvoiceController.php
+public function index()
+{
+    $this->authorize('viewAny', Invoice::class);
+    
+    $invoices = Invoice::with([
+        'cashier', 'quarry', 'customer', 'customerCar', 'contractor'
+    ])->paginate();
+    
+    return InvoiceResource::collection($invoices);
+}
+```
+
+### Form Requests
+```php
+// Example for StoreInvoiceRequest.php
+public function rules()
+{
+    return [
+        'quarry_id' => ['required', 'exists:quarries,id'],
+        'invoice_type' => ['required', 'string', 'in:Postpaid,cash'],
+        'customer_id' => ['required', 'exists:customer_accounts,id'],
+        'customer_car_id' => ['required', 'exists:cars,id'],
+        'contractor_id' => ['nullable', 'exists:car_contractors,id'],
+        'custody' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+        'the_items' => ['required', 'string', 'in:رمال,تربه,زلط,رديم'],
+        // More validation rules...
+    ];
+}
+```
+
+### Resources
+```php
+// Example for InvoiceResource.php
+public function toArray($request)
+{
+    return [
+        'id' => $this->id,
+        'cashier' => $this->whenLoaded('cashier', function () {
+            return new UserResource($this->cashier);
+        }),
+        'quarry' => $this->whenLoaded('quarry', function () {
+            return new QuarryResource($this->quarry);
+        }),
+        'invoice_type' => $this->invoice_type,
+        'customer' => $this->whenLoaded('customer', function () {
+            return new CustomerAccountResource($this->customer);
+        }),
+        // More fields and relations...
+        'created_at' => $this->created_at,
+        'updated_at' => $this->updated_at,
+    ];
+}
+```
+

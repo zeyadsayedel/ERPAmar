@@ -16,6 +16,10 @@ const mainNavItems: NavItem[] = [
     },
     { title: 'Cars', href: '/cars', icon: Car },
     { title: 'Quarries', href: '/quarries', icon: Building },
+    { title: 'Car Contractors', href: '/car-contractors', icon: Users }, // New item
+    { title: 'Customer Accounts', href: '/customer-accounts', icon: Folder }, // New item
+    { title: 'Invoices', href: '/invoices', icon: BookOpen }, // New item
+    { title: 'Supply Clients', href: '/supply-clients', icon: Building }, // New item
 ];
 
 // Admin menu items with required permissions
@@ -78,6 +82,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                {/* Main navigation */}
                 <NavMain items={mainNavItems} />
                 
                 {/* Conditionally render Admin section */}

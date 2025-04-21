@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         /* User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-        ]); */
+        ]);
 
         // Find the user by email
         $user = User::where('email', 'test@example.com')->first();
@@ -35,6 +35,11 @@ class DatabaseSeeder extends Seeder
         // Assign the role to the user
         $user->assignRole($adminRole);
         
-        $this->command->info('Admin role assigned to user: ' . $user->name);
+        $this->command->info('Admin role assigned to user: ' . $user->name); */
+        
+        // Call the dummy data seeder to generate test data
+        $this->call([
+            DummyDataSeeder::class,
+        ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\UserRoleService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -41,7 +42,7 @@ class HandleInertiaRequests extends Middleware
         }
         
         // Add debug info
-        \Log::info('Current route and module', [
+        Log::info('Current route and module', [
             'route' => $routeName,
             'module' => $module,
         ]);

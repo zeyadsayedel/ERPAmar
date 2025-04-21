@@ -9,6 +9,10 @@ use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\QuarryController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\PermissionController;
+use App\Http\Controllers\Api\CarContractorController;
+use App\Http\Controllers\Api\CustomerAccountController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\SupplyClientController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +37,18 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Quarry routes
     Route::apiResource('quarries', QuarryController::class);
+    
+    // Car Contractor routes
+    Route::apiResource('car-contractors', CarContractorController::class);
+
+    // Customer Account routes
+    Route::apiResource('customer-accounts', CustomerAccountController::class);
+
+    // Invoice routes
+    Route::apiResource('invoices', InvoiceController::class);
+
+    // Supply Client routes
+    Route::apiResource('supply-clients', SupplyClientController::class);
     
     // Role routes with granular permissions
     Route::prefix('roles')->name('roles.')->group(function () {
