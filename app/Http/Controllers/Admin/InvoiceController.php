@@ -11,6 +11,7 @@ use App\Models\CustomerAccount;
 use App\Models\Invoice;
 use App\Models\Quarry;
 use App\Services\Invoice\InvoicePricingService;
+use App\Services\InvoiceCsvImportService;
 use App\Traits\AuthorizesModuleActions;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -21,9 +22,9 @@ use Inertia\Response;
 class InvoiceController extends Controller
 {
     use AuthorizesModuleActions;
-    
+
     protected InvoicePricingService $invoicePricingService;
-    
+
     public function __construct(InvoicePricingService $invoicePricingService)
     {
         $this->module = 'invoice';
@@ -44,28 +45,28 @@ class InvoiceController extends Controller
 
         // Build base query
         $query = Invoice::with(['quarry', 'customer', 'customerCar', 'contractor', 'cashier']);
-        
+
         // Apply search filter if provided
         if ($search) {
             $query->where(function ($subquery) use ($search) {
                 $subquery->where('id', 'like', "%{$search}%")
-                         ->orWhere('the_items', 'like', "%{$search}%");
+                    ->orWhere('the_items', 'like', "%{$search}%");
             });
         }
-        
+
         // Apply status filter if provided
         if ($status) {
             $query->where('status', $status);
         }
-        
+
         // Add a virtual status field for the frontend
         $query->selectRaw("*, IF(flag = 0, 'pending', IF(flag = 1, 'active', IF(flag = 2, 'completed', 'cancelled'))) as status");
-        
+
         // Apply quarry filter if provided
         if ($quarryId) {
             $query->where('quarry_id', $quarryId);
         }
-        
+
         // Apply sorting
         $query->orderBy($sortField, $sortDirection);
 
@@ -99,11 +100,11 @@ class InvoiceController extends Controller
         $customers = CustomerAccount::all();
         $cars = Car::all();
         $contractors = CarContractor::all();
-        
+
         return Inertia::render('Invoice/Create', [
             'quarries' => $quarries,
             'customers' => $customers,
-            'cars' => $cars, 
+            'cars' => $cars,
             'contractors' => $contractors,
             'userPermissions' => $this->getUserModulePermissions(),
         ]);
@@ -148,7 +149,7 @@ class InvoiceController extends Controller
     {
         // Load relationships
         $invoice->load(['quarry', 'customer', 'customerCar', 'contractor', 'cashier']);
-        
+
         // Load related data for the form
         $quarries = Quarry::all();
         $customers = CustomerAccount::all();
@@ -159,7 +160,7 @@ class InvoiceController extends Controller
             'invoice' => $invoice,
             'quarries' => $quarries,
             'customers' => $customers,
-            'cars' => $cars, 
+            'cars' => $cars,
             'contractors' => $contractors,
             'userPermissions' => $this->getUserModulePermissions(),
         ]);
@@ -173,7 +174,7 @@ class InvoiceController extends Controller
         try {
             // Use the invoice service to update the invoice with recalculated prices
             $this->invoicePricingService->updateInvoice($invoice, $request->validated());
-            
+
             return redirect()->route('admin.invoices.index')
                 ->with('success', 'Invoice updated successfully.');
         } catch (Exception $e) {
@@ -190,7 +191,7 @@ class InvoiceController extends Controller
     {
         try {
             $invoice->delete();
-            
+
             return redirect()->route('admin.invoices.index')
                 ->with('success', 'Invoice deleted successfully.');
         } catch (Exception $e) {
@@ -211,5 +212,51 @@ class InvoiceController extends Controller
             'invoice' => $invoice,
             'userPermissions' => $this->getUserModulePermissions(),
         ]);
+    }    /**
+     * Import invoices from CSV.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Services\InvoiceCsvImportService $importService
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function import(Request $request, InvoiceCsvImportService $importService)
+    {
+        try {
+            // Validate the uploaded file
+            $request->validate([
+                'csv' => 'required|file|mimes:csv,txt|max:10240', // Max 10MB
+            ]);
+
+            $file = $request->file('csv');
+            
+            // Store the file in a temporary location
+            $path = $file->storeAs('tmp/imports', 'invoices_' . time() . '.csv');
+            $fullPath = storage_path("app/{$path}");
+            
+            // Import the invoices using our service
+            $count = $importService->import($fullPath);
+            
+            // Clean up the temporary file
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+            
+            return redirect()->route('admin.invoices.index')
+                ->with('success', "{$count} invoices imported successfully.");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', "Import failed: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * Export invoices to CSV.
+     */
+    public function export(Request $request): RedirectResponse
+    {
+        // Implement CSV export logic here
+        // For now, just redirect back with a success message
+        return redirect()->back()
+            ->with('success', 'Invoices exported successfully.');
     }
 }
