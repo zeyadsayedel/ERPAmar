@@ -29,12 +29,14 @@ export default function Index({ invoices }: Props) {
     }).format(amount);
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'paid':
+  const getStatusBadgeClass = (flag: number) => {
+    switch (flag) {
+      case 1:
         return 'bg-green-100 text-green-800';
-      case 'cancelled':
+      case 0:
         return 'bg-red-100 text-red-800';
+      case 2:
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-yellow-100 text-yellow-800';
     }
@@ -72,12 +74,13 @@ export default function Index({ invoices }: Props) {
                   {invoices.map((invoice) => (
                     <TableRow key={invoice.id}>
                       <TableCell>{invoice.invoice_number}</TableCell>
-                      <TableCell>{formatDate(invoice.date)}</TableCell>
-                      <TableCell>{invoice.customer_account?.name}</TableCell>
-                      <TableCell>{formatCurrency(invoice.total_amount)}</TableCell>
+                      <TableCell>{formatDate(invoice.created_at)}</TableCell>
+                      <TableCell>{invoice.customer?.name}</TableCell>
+                      <TableCell>{formatCurrency(invoice.total)}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(invoice.status)}`}>
-                          {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                        {/* reminder change status to flag and make flag like this 0= cancelled 1= paid 2=returned */}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(invoice.flag)}`}>
+                          {invoice.flag === 0 ? 'Cancelled' : invoice.flag === 1 ? 'Paid' : 'Returned'}
                         </span>
                       </TableCell>
                       <TableCell>

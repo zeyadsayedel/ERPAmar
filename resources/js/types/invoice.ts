@@ -1,6 +1,7 @@
 
 export interface Invoice {
   id: number;
+  invoice_number: string;
   cashier_id: number;
   cashier?: { id: number; name: string };
   quarry_id: number;
